@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Diseño Web con IA ✨</title>
+    <!-- Dependencias (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link id="google-font-link" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Estilos Base -->
+    <style>
+        body { scroll-behavior: smooth; font-family: 'Roboto', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .code-area { font-family: 'SF Mono', 'Courier New', monospace; font-size: 13px; }
+        .control-group { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.75rem; }
+        .lucide { stroke-width: 1.5; }
+        .tab-btn.active { background-color: #3b82f6; color: white; }
+        .layout-selector { border: 2px solid transparent; transition: all 0.2s ease-in-out; }
+        .layout-selector.selected { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4); }
+        .color-palette-btn { transition: all 0.2s; transform-origin: center; }
+        .color-palette-btn:hover { transform: scale(1.1); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-header svg { transition: transform 0.3s ease-out; }
+        .accordion-button.open svg { transform: rotate(180deg); }
+        .gemini-btn:disabled { background-color: #9ca3af; cursor: not-allowed; }
+    </style>
+</head>
+<body class="bg-gray-200">
+
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        <!-- ================== Panel de Controles ================== -->
+        <aside class="w-full lg:w-1/3 xl:w-1/4 bg-white shadow-xl overflow-y-auto">
+            <div class="p-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Diseñador Web con IA ✨</h1>
+                <p class="text-gray-500 mb-6">Personaliza y genera tu código al instante.</p>
+
+                <div class="space-y-4">
+                    <!-- Acordeón: Asistente AI -->
+                    <div class="control-group border-violet-500 border-2">
+                        <button class="accordion-button open w-full flex justify-between items-center p-4 font-semibold text-violet-700">
+                            <span class="flex items-center gap-2"><i data-lucide="sparkles"></i>Asistente AI</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <div class="accordion-content p-4 pt-0" style="max-height: 500px;">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="geminiApiKey" class="text-sm font-medium text-gray-600">Tu Clave API de Gemini</label>
+                                    <input type="password" id="geminiApiKey" placeholder="Pega tu clave aquí" class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-500 hover:underline">Obtener una clave de API</a>
+                                </div>
+                                <hr/>
+                                <div>
+                                    <label for="websiteTopic" class="text-sm font-medium text-gray-600">¿Sobre qué es tu web?</label>
+                                    <input type="text" id="websiteTopic" placeholder="Ej: Cafetería artesanal, Portafolio..." class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">
+                                    <button id="suggestContentBtn" class="gemini-btn w-full mt-2 bg-violet-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-violet-700 transition text-sm flex items-center justify-center gap-2">
+                                        <i data-lucide="wand-2" class="w-4 h-4"></i>Sugerir Contenido
+                                    </button>
+                                </div>
+                                <hr/>
+                                <div>
+                                    <label for="websiteStyle" class="text-sm font-medium text-gray-600">Describe un estilo o ambiente</label>
+                                    <input type="text" id="websiteStyle" placeholder="Ej: Moderno y minimalista, Cálido..." class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">
+                                    <button id="suggestPaletteBtn" class="gemini-btn w-full mt-2 bg-violet-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-violet-700 transition text-sm flex items-center justify-center gap-2">
+                                        <i data-lucide="palette" class="w-4 h-4"></i>Sugerir Paleta de Colores
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón: Diseño Global -->
+                    <div class="control-group">
+                        <button class="accordion-button w-full flex justify-between items-center p-4 font-semibold text-gray-700">
+                            <span class="flex items-center gap-2"><i data-lucide="globe"></i>Diseño Global</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <div class="accordion-content p-4 pt-0">
+                            <h3 class="text-md font-semibold text-gray-700 mb-3">Paletas de Color</h3>
+                            <div class="flex gap-4 mb-4" id="color-palettes">
+                                 <div data-palette="light" class="color-palette-btn cursor-pointer w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 border-2 border-blue-500" title="Claro"><i data-lucide="sun" class="text-blue-500"></i></div>
+                                 <div data-palette="dark" class="color-palette-btn cursor-pointer w-10 h-10 rounded-full flex items-center justify-center bg-gray-800" title="Oscuro"><i data-lucide="moon" class="text-white"></i></div>
+                                 <div data-palette="corp" class="color-palette-btn cursor-pointer w-10 h-10 rounded-full flex items-center justify-center bg-blue-700" title="Corporativo"><i data-lucide="briefcase" class="text-white"></i></div>
+                            </div>
+                            <label for="googleFont" class="text-sm font-medium text-gray-600">Fuente de Google Fonts</label>
+                            <input type="text" id="googleFont" value="Roboto" class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">
+                        </div>
+                    </div>
+
+                    <!-- Acordeón: Encabezado -->
+                    <div class="control-group">
+                         <button class="accordion-button w-full flex justify-between items-center p-4 font-semibold text-gray-700">
+                            <span class="flex items-center gap-2"><i data-lucide="layout-template"></i>Encabezado</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <div class="accordion-content p-4 pt-0">
+                           <h3 class="text-md font-semibold text-gray-700 mb-3">Diseño</h3>
+                           <div class="grid grid-cols-3 gap-3 mb-4" id="header-layout-options">
+                                <img src="https://placehold.co/100x60/e2e8f0/94a3b8?text=L-R" alt="Logo Izquierda, Nav Derecha" class="layout-selector rounded-md cursor-pointer selected" data-layout="left-right" title="Logo Izquierda, Navegación Derecha">
+                                <img src="https://placehold.co/100x60/e2e8f0/94a3b8?text=L-C-R" alt="Logo Izquierda, Nav Centro" class="layout-selector rounded-md cursor-pointer" data-layout="left-center-right" title="Logo Izquierda, Navegación Centro">
+                                <img src="https://placehold.co/100x60/e2e8f0/94a3b8?text=C-B" alt="Logo Centrado, Nav Abajo" class="layout-selector rounded-md cursor-pointer" data-layout="center-below" title="Logo Centrado, Navegación Abajo">
+                            </div>
+                            <hr class="my-4">
+                            <h3 class="text-md font-semibold text-gray-700 mb-3">Contenido</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-600 mb-2 block">Tipo de Logo</label>
+                                    <div class="flex items-center space-x-4">
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="logoType" value="text" checked class="form-radio"> Texto</label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="logoType" value="image" class="form-radio"> Imagen</label>
+                                    </div>
+                                </div>
+                                <div id="logo-text-controls">
+                                    <label for="logoText" class="text-sm font-medium text-gray-600">Texto del Logo</label>
+                                    <input type="text" id="logoText" value="MiWeb" class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">
+                                </div>
+                                <div id="logo-image-controls" class="hidden">
+                                    <label for="logoImageUrl" class="text-sm font-medium text-gray-600">URL de la Imagen</label>
+                                    <input type="text" id="logoImageUrl" placeholder="https://..." class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">
+                                </div>
+                                <div>
+                                    <label for="navLinks" class="text-sm font-medium text-gray-600">Enlaces de Navegación <span class="text-xs text-gray-400">(texto,url)</span></label>
+                                    <textarea id="navLinks" rows="3" class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">Inicio,#&#10;Productos,#&#10;Sobre Nosotros,#&#10;Contacto,#</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Acordeón: Pie de Página -->
+                    <div class="control-group">
+                        <button class="accordion-button w-full flex justify-between items-center p-4 font-semibold text-gray-700">
+                           <span class="flex items-center gap-2"><i data-lucide="layout-panel-left"></i>Pie de Página</span>
+                           <i data-lucide="chevron-down"></i>
+                       </button>
+                       <div class="accordion-content p-4 pt-0">
+                           <h3 class="text-md font-semibold text-gray-700 mb-3">Diseño</h3>
+                           <div class="grid grid-cols-3 gap-3 mb-4" id="footer-layout-options">
+                               <img src="https://placehold.co/100x60/e2e8f0/94a3b8?text=Simple" alt="Simple" class="layout-selector rounded-md cursor-pointer selected" data-layout="simple" title="Simple Centrado">
+                               <img src="https://placehold.co/100x60/e2e8f0/94a3b8?text=Multi" alt="Multi-Columna" class="layout-selector rounded-md cursor-pointer" data-layout="multi-column" title="Multi-Columna">
+                           </div>
+                           <hr class="my-4">
+                           <h3 class="text-md font-semibold text-gray-700 mb-3">Contenido</h3>
+                           <div class="space-y-4">
+                                <div id="footer-links-controls" class="hidden">
+                                    <label for="footerLinks" class="text-sm font-medium text-gray-600">Enlaces del Pie de Página <span class="text-xs text-gray-400">(TÍTULO:enlace,url;...)</span></label>
+                                    <textarea id="footerLinks" rows="4" class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">Empresa:Sobre Nosotros,nosotros.html;Carreras,carreras.html&#10;Recursos:Blog,blog.html;Ayuda,ayuda.html</textarea>
+                                </div>
+                                <div>
+                                    <label for="footerText" class="text-sm font-medium text-gray-600">Texto de Copyright</label>
+                                    <input type="text" id="footerText" value="© 2025 MiWeb. Todos los derechos reservados." class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">
+                                </div>
+                                <div>
+                                    <label for="socialLinks" class="text-sm font-medium text-gray-600">Redes Sociales <span class="text-xs text-gray-400">(nombre,url)</span></label>
+                                    <textarea id="socialLinks" rows="3" class="mt-1 w-full border-gray-300 rounded-md shadow-sm p-2">twitter,https://twitter.com&#10;instagram,https://instagram.com&#10;github,https://github.com</textarea>
+                                </div>
+                           </div>
+                       </div>
+                   </div>
+
+                    <!-- Acordeón: Estilos y Dimensiones -->
+                    <div class="control-group">
+                        <button class="accordion-button w-full flex justify-between items-center p-4 font-semibold text-gray-700">
+                            <span class="flex items-center gap-2"><i data-lucide="paintbrush-2"></i>Estilos y Dimensiones</span>
+                            <i data-lucide="chevron-down"></i>
+                        </button>
+                        <div class="accordion-content p-4 pt-0">
+                            <div class="space-y-5">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="flex flex-col items-center"><label class="text-sm">Primario</label><input type="color" id="primaryColor" value="#3b82f6"></div>
+                                    <div class="flex flex-col items-center"><label class="text-sm">Fondo H.</label><input type="color" id="headerBgColor" value="#ffffff"></div>
+                                    <div class="flex flex-col items-center"><label class="text-sm">Texto</label><input type="color" id="textColor" value="#1f2937"></div>
+                                    <div class="flex flex-col items-center"><label class="text-sm">Fondo F.</label><input type="color" id="footerBgColor" value="#111827"></div>
+                                </div>
+                                <div id="logo-font-size-slider">
+                                    <label class="text-sm font-medium">Tamaño Logo (Texto): <span id="logoFontSizeValue" class="font-bold">30px</span></label>
+                                    <input type="range" id="logoFontSize" min="18" max="52" value="30" class="w-full">
+                                </div>
+                                <div id="logo-image-height-slider" class="hidden">
+                                    <label class="text-sm font-medium">Altura Logo (Imagen): <span id="logoImageHeightValue" class="font-bold">40px</span></label>
+                                    <input type="range" id="logoImageHeight" min="20" max="80" value="40" class="w-full">
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium">Tamaño Navegación: <span id="navFontSizeValue" class="font-bold">16px</span></label>
+                                    <input type="range" id="navFontSize" min="12" max="24" value="16" class="w-full">
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm font-medium text-gray-600">Encabezado Fijo (Sticky)</span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" id="stickyHeader" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de Acción -->
+                <a href="#code-output" id="generateBtn" class="w-full mt-6 bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-300 text-center block flex items-center justify-center gap-2">
+                    <i data-lucide="code"></i>Generar Código
+                </a>
+            </div>
+        </aside>
+
+        <!-- ================== Área de Vista Previa y Código ================== -->
+        <main class="w-full lg:w-2/3 xl:w-3/4 p-4 sm:p-6 lg:p-10 bg-gray-200">
+            <div class="bg-white rounded-xl shadow-lg h-full flex flex-col">
+                <!-- Vista Previa -->
+                <div class="p-6 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Vista Previa en Vivo</h2>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <div id="previewHeaderContainer" class="transition-all duration-300"></div>
+                        <div class="h-48 flex items-center justify-center text-gray-400 text-lg p-4 bg-gray-50">
+                            <p>El contenido de tu página iría aquí.</p>
+                        </div>
+                        <div id="previewFooterContainer" class="transition-all duration-300"></div>
+                    </div>
+                </div>
+                <!-- Salida de Código -->
+                <div id="code-output" class="p-6 flex-grow flex flex-col">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Código Generado</h2>
+                    <!-- Pestañas -->
+                    <div class="flex border-b border-gray-200 mb-2">
+                        <button class="tab-btn active py-2 px-4 font-semibold" data-tab="header-html">HTML Encabezado</button>
+                        <button class="tab-btn py-2 px-4 font-semibold text-gray-500" data-tab="footer-html">HTML Pie de Página</button>
+                        <button class="tab-btn py-2 px-4 font-semibold text-gray-500" data-tab="css">CSS</button>
+                        <button class="tab-btn py-2 px-4 font-semibold text-gray-500" data-tab="js">JavaScript</button>
+                    </div>
+                    <!-- Contenido Pestañas -->
+                    <div class="flex-grow relative">
+                        <div id="header-html-content" class="tab-content h-full">
+                            <button data-target="headerHtmlCode" class="copy-btn absolute top-2 right-2 bg-gray-700 text-white text-xs font-bold py-1 px-3 rounded-md hover:bg-gray-600 z-10 flex items-center gap-1"><i data-lucide="copy" class="w-4 h-4"></i>Copiar</button>
+                            <textarea id="headerHtmlCode" readonly class="code-area w-full h-full bg-gray-800 text-white p-4 rounded-md resize-none"></textarea>
+                        </div>
+                        <div id="footer-html-content" class="tab-content h-full hidden">
+                            <button data-target="footerHtmlCode" class="copy-btn absolute top-2 right-2 bg-gray-700 text-white text-xs font-bold py-1 px-3 rounded-md hover:bg-gray-600 z-10 flex items-center gap-1"><i data-lucide="copy" class="w-4 h-4"></i>Copiar</button>
+                            <textarea id="footerHtmlCode" readonly class="code-area w-full h-full bg-gray-800 text-white p-4 rounded-md resize-none"></textarea>
+                        </div>
+                         <div id="css-content" class="tab-content h-full hidden">
+                            <button data-target="cssCode" class="copy-btn absolute top-2 right-2 bg-gray-700 text-white text-xs font-bold py-1 px-3 rounded-md hover:bg-gray-600 z-10 flex items-center gap-1"><i data-lucide="copy" class="w-4 h-4"></i>Copiar</button>
+                            <textarea id="cssCode" readonly class="code-area w-full h-full bg-gray-800 text-white p-4 rounded-md resize-none"></textarea>
+                        </div>
+                         <div id="js-content" class="tab-content h-full hidden">
+                            <button data-target="jsCode" class="copy-btn absolute top-2 right-2 bg-gray-700 text-white text-xs font-bold py-1 px-3 rounded-md hover:bg-gray-600 z-10 flex items-center gap-1"><i data-lucide="copy" class="w-4 h-4"></i>Copiar</button>
+                            <textarea id="jsCode" readonly class="code-area w-full h-full bg-gray-800 text-white p-4 rounded-md resize-none"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+// ===================================================================================
+// INICIO: CÓDIGO DEL GENERADOR (integrado para fácil despliegue)
+// ===================================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+
+    const dom = {
+        // --- Acordeones ---
+        accordionButtons: document.querySelectorAll('.accordion-button'),
+
+        // --- Asistente IA ---
+        geminiApiKey: document.getElementById('geminiApiKey'),
+        websiteTopic: document.getElementById('websiteTopic'),
+        websiteStyle: document.getElementById('websiteStyle'),
+        suggestContentBtn: document.getElementById('suggestContentBtn'),
+        suggestPaletteBtn: document.getElementById('suggestPaletteBtn'),
+
+        // --- Controles Globales ---
+        colorPalettes: document.getElementById('color-palettes'),
+        googleFont: document.getElementById('googleFont'),
+        
+        // --- Controles del Encabezado ---
+        headerLayoutOptions: document.getElementById('header-layout-options'),
+        logoTypeRadios: document.querySelectorAll('input[name="logoType"]'),
+        logoText: document.getElementById('logoText'),
+        logoImageUrl: document.getElementById('logoImageUrl'),
+        navLinks: document.getElementById('navLinks'),
+        
+        // --- Controles del Pie de Página ---
+        footerLayoutOptions: document.getElementById('footer-layout-options'),
+        footerLinks: document.getElementById('footerLinks'),
+        footerText: document.getElementById('footerText'),
+        socialLinks: document.getElementById('socialLinks'),
+        footerLinksControls: document.getElementById('footer-links-controls'),
+
+        // --- Controles de Estilos y Dimensiones ---
+        primaryColor: document.getElementById('primaryColor'),
+        headerBgColor: document.getElementById('headerBgColor'),
+        textColor: document.getElementById('textColor'),
+        footerBgColor: document.getElementById('footerBgColor'),
+        stickyHeader: document.getElementById('stickyHeader'),
+        logoFontSize: document.getElementById('logoFontSize'),
+        logoImageHeight: document.getElementById('logoImageHeight'),
+        navFontSize: document.getElementById('navFontSize'),
+        logoFontSizeValue: document.getElementById('logoFontSizeValue'),
+        logoImageHeightValue: document.getElementById('logoImageHeightValue'),
+        navFontSizeValue: document.getElementById('navFontSizeValue'),
+        logoTextControls: document.getElementById('logo-text-controls'),
+        logoImageControls: document.getElementById('logo-image-controls'),
+        logoFontSizeSlider: document.getElementById('logo-font-size-slider'),
+        logoImageHeightSlider: document.getElementById('logo-image-height-slider'),
+
+        // --- Salida y Vista Previa ---
+        previewHeader: document.getElementById('previewHeaderContainer'),
+        previewFooter: document.getElementById('previewFooterContainer'),
+        generateBtn: document.getElementById('generateBtn'),
+        copyBtns: document.querySelectorAll('.copy-btn'),
+        headerHtmlCode: document.getElementById('headerHtmlCode'),
+        footerHtmlCode: document.getElementById('footerHtmlCode'),
+        cssCode: document.getElementById('cssCode'),
+        jsCode: document.getElementById('jsCode'),
+        tabBtns: document.querySelectorAll('.tab-btn'),
+        tabContents: document.querySelectorAll('.tab-content'),
+        googleFontLink: document.getElementById('google-font-link'),
+    };
+
+    const config = {
+        headerLayout: 'left-right',
+        footerLayout: 'simple',
+        logoType: 'text',
+        logoText: 'MiWeb',
+        logoImageUrl: '',
+        navLinks: 'Inicio,#\nProductos,#\nSobre Nosotros,#\nContacto,#',
+        footerText: '© 2025 MiWeb. Todos los derechos reservados.',
+        footerLinks: 'Empresa:Sobre Nosotros,nosotros.html;Carreras,carreras.html\nRecursos:Blog,blog.html;Ayuda,ayuda.html',
+        socialLinks: 'twitter,https://twitter.com\ninstagram,https://instagram.com\ngithub,https://github.com',
+        googleFont: 'Roboto',
+        colors: {
+            primary: '#3b82f6',
+            headerBg: '#ffffff',
+            text: '#1f2937',
+            footerBg: '#111827',
+        },
+        sizes: {
+            logoFont: 30,
+            logoImageHeight: 40,
+            nav: 16,
+        },
+        sticky: true,
+    };
+
+    const palettes = {
+        light: { primary: '#3b82f6', headerBg: '#ffffff', text: '#1f2937', footerBg: '#111827' },
+        dark: { primary: '#60a5fa', headerBg: '#1f2937', text: '#f3f4f6', footerBg: '#111827' },
+        corp: { primary: '#ffffff', headerBg: '#0d47a1', text: '#bbdefb', footerBg: '#0d3c91' },
+    };
+
+    const socialIcons = {
+        facebook: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`,
+        twitter: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>`,
+        instagram: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`,
+        linkedin: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>`,
+        github: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>`,
+        default: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>`
+    };
+    
+    // --- Lógica de la API de Gemini ---
+    async function callGeminiAPI(prompt, apiKey, isJson = false) {
+        const model = 'gemini-1.5-flash-latest';
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+        };
+        
+        if (isJson) {
+            payload.generationConfig = {
+                responseMimeType: "application/json",
+            };
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Error de la API: ${errorData.error.message}`);
+            }
+
+            const data = await response.json();
+            if (!data.candidates || !data.candidates[0].content.parts[0]) {
+                 throw new Error("Respuesta inesperada de la API.");
+            }
+            const text = data.candidates[0].content.parts[0].text;
+            return text;
+
+        } catch (error) {
+            console.error("Error al llamar a la API de Gemini:", error);
+            alert("Hubo un error al contactar al asistente de IA. Revisa tu clave de API y la consola para más detalles.");
+            return null;
+        }
+    }
+
+
+    const debounce = (func, delay = 300) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => { func.apply(this, args); }, delay);
+        };
+    };
+
+    function generateCode() {
+        // ... (resto de la función generateCode sin cambios)
+        // --- Generación de Contenido Dinámico ---
+        const logoContent = config.logoType === 'text'
+            ? config.logoText
+            : `<img src="${config.logoImageUrl || 'https://placehold.co/150x50/eeeeee/aaaaaa?text=Logo'}" alt="Logo de ${config.logoText || 'la empresa'}">`;
+
+        const navLinksHtml = config.navLinks.split('\n').filter(Boolean).map(line => {
+            const [text, url] = line.split(',');
+            return `<li><a href="${(url || '#').trim()}" class="site-nav-link">${(text || '').trim()}</a></li>`;
+        }).join('');
+        
+        const socialLinksHtml = config.socialLinks.split('\n').filter(Boolean).map(line => {
+             const [name, url] = line.split(',');
+             const iconKey = name.trim().toLowerCase();
+             const icon = socialIcons[iconKey] || socialIcons.default;
+             return `<a href="${(url || '#').trim()}" aria-label="${name.trim()}" target="_blank" rel="noopener noreferrer">${icon}</a>`;
+        }).join('');
+        
+        const footerLinkColumnsHtml = config.footerLinks.split('\n').filter(Boolean).map(line => {
+            const [title, linksPart] = line.split(':');
+            const linksHtml = (linksPart || '').split(';').filter(Boolean).map(part => {
+                const [text, url] = part.split(',');
+                return `<li><a href="${(url || '#').trim()}">${(text || '').trim()}</a></li>`;
+            }).join('');
+            return `<div class="footer-column"><h4>${title.trim()}</h4><ul>${linksHtml}</ul></div>`;
+        }).join('');
+
+        // --- Generación de HTML ---
+        let headerClasses = "site-header";
+        if (config.headerLayout === 'center-below') headerClasses += " header-layout-center-below";
+        
+        const headerHtml = `<!-- INICIO: Encabezado -->
+<header class="${headerClasses}">
+    <div class="container">
+        <a href="#" class="site-logo">${logoContent}</a>
+        <nav class="site-nav">
+            <ul>${navLinksHtml}</ul>
+        </nav>
+        <button class="mobile-menu-toggle" aria-label="Abrir menú">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </div>
+</header>
+<!-- FIN: Encabezado -->`;
+        
+        let footerContentHtml = '';
+        if(config.footerLayout === 'multi-column') {
+             footerContentHtml = `<div class="footer-main">${footerLinkColumnsHtml}</div><div class="footer-bottom"><p>${config.footerText}</p><div class="social-links">${socialLinksHtml}</div></div>`;
+        } else {
+             footerContentHtml = `<div class="footer-bottom"><p>${config.footerText}</p><div class="social-links">${socialLinksHtml}</div></div>`;
+        }
+        
+        const footerHtml = `<!-- INICIO: Pie de Página -->
+<footer class="site-footer footer-layout-${config.footerLayout}">
+    <div class="container">${footerContentHtml}</div>
+</footer>
+<!-- FIN: Pie de Página -->`;
+
+        // --- Generación de CSS ---
+        const headerLayoutCss = {
+            'left-right': `.site-header .container { justify-content: space-between; }`,
+            'left-center-right': `.site-header .container { justify-content: space-between; }\n.site-nav { flex-grow: 1; display: flex; justify-content: center; }`,
+            'center-below': `.site-header .container { flex-direction: column; gap: 1rem; }\n.site-header { padding: 1.5rem 0; }`
+        };
+        const footerLayoutCss = {
+            'simple': `.site-footer .container { flex-direction: column; justify-content: center; text-align: center; } .footer-bottom { display: flex; flex-direction: column; gap: 1rem; align-items: center; }`,
+            'multi-column': `.site-footer .container { flex-direction: column; align-items: stretch; } .footer-main { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 2rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); } .footer-column h4 { margin-top: 0; } .footer-column ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.5rem; } .footer-column a { color: #d1d5db; text-decoration: none; } .footer-column a:hover { color: var(--color-primary); } .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 2rem; flex-wrap: wrap; gap: 1rem; }`
+        };
+
+        const cssCode = `/* --- Estilos Generales --- */
+:root {
+    --font-primary: '${config.googleFont}', sans-serif;
+    --color-primary: ${config.colors.primary};
+    --color-header-bg: ${config.colors.headerBg};
+    --color-text: ${config.colors.text};
+    --color-footer-bg: ${config.colors.footerBg};
+    --size-logo-font: ${config.sizes.logoFont}px;
+    --size-logo-image-height: ${config.sizes.logoImageHeight}px;
+    --size-nav: ${config.sizes.nav}px;
+}
+body { font-family: var(--font-primary); margin: 0; color: var(--color-text); background-color: #f1f5f9; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; width: 100%; box-sizing: border-box; }
+.mobile-menu-open { overflow: hidden; }
+
+/* --- Encabezado --- */
+.site-header { background-color: var(--color-header-bg); padding: 1rem 0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s ease; }
+.site-logo { font-size: var(--size-logo-font); font-weight: 700; color: var(--color-primary); text-decoration: none; display: flex; align-items: center; }
+.site-logo img { height: var(--size-logo-image-height); width: auto; }
+.site-nav ul { margin: 0; padding: 0; list-style: none; display: flex; gap: 2rem; }
+.site-nav a { font-size: var(--size-nav); color: var(--color-text); text-decoration: none; font-weight: 500; transition: color 0.2s; }
+.site-nav a:hover { color: var(--color-primary); }
+${headerLayoutCss[config.headerLayout]}
+${config.sticky ? `.site-header { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; }` : ''}
+
+/* --- Pie de Página --- */
+.site-footer { background-color: var(--color-footer-bg); color: #e5e7eb; padding: 3rem 0; }
+.site-footer p { margin: 0; color: #d1d5db; font-size: 0.9rem; }
+.social-links { display: flex; gap: 1rem; }
+.social-links a { color: #e5e7eb; transition: color 0.2s; }
+.social-links a:hover { color: var(--color-primary); }
+${footerLayoutCss[config.footerLayout]}
+
+/* --- Menú Móvil --- */
+.mobile-menu-toggle { display: none; background: none; border: none; cursor: pointer; color: var(--color-text); }
+@media (max-width: 768px) {
+    .site-nav { display: none; position: absolute; top: 100%; left: 0; width: 100%; background-color: var(--color-header-bg); box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 999; }
+    .site-nav.active { display: block; }
+    .site-nav ul { flex-direction: column; padding: 1rem; }
+    .site-nav li { text-align: center; padding: 0.5rem 0; }
+    .mobile-menu-toggle { display: block; }
+    .footer-bottom { flex-direction: column; text-align: center; }
+}`;
+
+        const jsCode = `// --- Lógica para Menú Móvil ---
+document.addEventListener('DOMContentLoaded', function() {
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const siteNav = document.querySelector('.site-nav');
+    if (menuToggle && siteNav) {
+        menuToggle.addEventListener('click', function() {
+            siteNav.classList.toggle('active');
+            document.body.classList.toggle('mobile-menu-open');
+        });
+    }
+});`;
+
+        return { headerHtml, footerHtml, cssCode, jsCode };
+    }
+
+    function updateUIFromConfig() {
+        // ... (resto de la función updateUIFromConfig sin cambios)
+        // Actualiza todos los inputs con los valores del objeto config
+        document.querySelector(`input[name="logoType"][value="${config.logoType}"]`).checked = true;
+        dom.headerLayoutOptions.querySelectorAll('.layout-selector').forEach(el => el.classList.remove('selected'));
+        dom.headerLayoutOptions.querySelector(`[data-layout="${config.headerLayout}"]`).classList.add('selected');
+        dom.footerLayoutOptions.querySelectorAll('.layout-selector').forEach(el => el.classList.remove('selected'));
+        dom.footerLayoutOptions.querySelector(`[data-layout="${config.footerLayout}"]`).classList.add('selected');
+        
+        dom.logoText.value = config.logoText;
+        dom.logoImageUrl.value = config.logoImageUrl;
+        dom.navLinks.value = config.navLinks;
+        dom.footerText.value = config.footerText;
+        dom.footerLinks.value = config.footerLinks;
+        dom.socialLinks.value = config.socialLinks;
+        dom.googleFont.value = config.googleFont;
+        dom.primaryColor.value = config.colors.primary;
+        dom.headerBgColor.value = config.colors.headerBg;
+        dom.textColor.value = config.colors.text;
+        dom.footerBgColor.value = config.colors.footerBg;
+        dom.logoFontSize.value = config.sizes.logoFont;
+        dom.logoImageHeight.value = config.sizes.logoImageHeight;
+        dom.navFontSize.value = config.sizes.nav;
+        dom.stickyHeader.checked = config.sticky;
+    }
+    
+    // --- Lógica de UI Dinámica ---
+    const toggleLogoControls = () => {
+        const isText = config.logoType === 'text';
+        dom.logoTextControls.style.display = isText ? 'block' : 'none';
+        dom.logoFontSizeSlider.style.display = isText ? 'block' : 'none';
+        dom.logoImageControls.style.display = isText ? 'none' : 'block';
+        dom.logoImageHeightSlider.style.display = isText ? 'none' : 'block';
+    };
+
+    const toggleFooterControls = () => {
+        const isMultiColumn = config.footerLayout === 'multi-column';
+        dom.footerLinksControls.style.display = isMultiColumn ? 'block' : 'none';
+    };
+
+    // --- Renderizado Principal ---
+    const render = () => {
+        // ... (resto de la función render sin cambios)
+        const fontName = config.googleFont.replace(/\s+/g, '+');
+        dom.googleFontLink.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@400;500;700&display=swap`;
+        const { headerHtml, footerHtml, cssCode, jsCode } = generateCode();
+        
+        const styleId = 'dynamic-preview-styles';
+        let styleTag = document.getElementById(styleId);
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = styleId;
+            document.head.appendChild(styleTag);
+        }
+
+        let headerHeight = 0;
+        if (config.sticky) {
+            const tempHeader = document.createElement('div');
+            tempHeader.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none;';
+            tempHeader.innerHTML = headerHtml;
+            document.body.appendChild(tempHeader);
+            headerHeight = tempHeader.querySelector('.site-header').offsetHeight;
+            document.body.removeChild(tempHeader);
+        }
+
+        const dynamicPaddingCSS = config.sticky ? `body { padding-top: ${headerHeight}px; }` : `body { padding-top: 0; }`;
+        styleTag.innerHTML = cssCode + '\n' + dynamicPaddingCSS;
+        document.body.style.fontFamily = `'${config.googleFont}', sans-serif`;
+
+        dom.previewHeader.innerHTML = headerHtml;
+        dom.previewFooter.innerHTML = footerHtml;
+        dom.headerHtmlCode.value = headerHtml;
+        dom.footerHtmlCode.value = footerHtml;
+        dom.cssCode.value = `/* Pega el siguiente link en la sección <head> de tu HTML: */\n<link href="${dom.googleFontLink.href}" rel="stylesheet">\n\n${cssCode}\n${dynamicPaddingCSS}`;
+        dom.jsCode.value = jsCode;
+
+        dom.logoFontSizeValue.textContent = `${config.sizes.logoFont}px`;
+        dom.logoImageHeightValue.textContent = `${config.sizes.logoImageHeight}px`;
+        dom.navFontSizeValue.textContent = `${config.sizes.nav}px`;
+    };
+    
+    const debouncedRender = debounce(render, 500);
+
+    // --- Vinculación de Eventos ---
+    function attachListeners() {
+        // ... (resto de los listeners existentes)
+        // Eventos para inputs, textareas
+        document.querySelectorAll('input, textarea').forEach(el => {
+            el.addEventListener('input', e => {
+                const key = e.target.id;
+                // Actualiza el objeto config basado en el ID del elemento
+                if (key.includes('Color')) {
+                    const colorKey = key.replace('Color', '');
+                    config.colors[colorKey] = e.target.value;
+                } else if (key === 'logoFontSize') {
+                    config.sizes.logoFont = e.target.value;
+                } else if (key === 'logoImageHeight') {
+                    config.sizes.logoImageHeight = e.target.value;
+                } else if (key === 'navFontSize') {
+                    config.sizes.nav = e.target.value;
+                } else if (config.hasOwnProperty(key)) {
+                    config[key] = e.target.value;
+                }
+                
+                if (key === 'googleFont') debouncedRender();
+                else render();
+            });
+        });
+        
+        // Eventos específicos para radios y checkboxes
+        dom.logoTypeRadios.forEach(radio => radio.addEventListener('change', (e) => {
+            config.logoType = e.target.value;
+            toggleLogoControls();
+            render();
+        }));
+        dom.stickyHeader.addEventListener('change', e => {
+            config.sticky = e.target.checked;
+            render();
+        });
+        
+        // Eventos para selectores de layout (delegación de eventos)
+        dom.headerLayoutOptions.addEventListener('click', e => {
+            const selector = e.target.closest('.layout-selector');
+            if (selector) {
+                dom.headerLayoutOptions.querySelectorAll('.layout-selector').forEach(el => el.classList.remove('selected'));
+                selector.classList.add('selected');
+                config.headerLayout = selector.dataset.layout;
+                render();
+            }
+        });
+        dom.footerLayoutOptions.addEventListener('click', e => {
+            const selector = e.target.closest('.layout-selector');
+            if (selector) {
+                dom.footerLayoutOptions.querySelectorAll('.layout-selector').forEach(el => el.classList.remove('selected'));
+                selector.classList.add('selected');
+                config.footerLayout = selector.dataset.layout;
+                toggleFooterControls();
+                render();
+            }
+        });
+
+        // Evento para paletas de color
+        dom.colorPalettes.addEventListener('click', e => {
+            const btn = e.target.closest('[data-palette]');
+            if (btn) {
+                config.colors = { ...palettes[btn.dataset.palette] };
+                updateUIFromConfig();
+                render();
+            }
+        });
+        
+        // Evento para acordeones
+        dom.accordionButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                button.classList.toggle('open');
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        });
+
+        // Eventos para botones de generar y copiar
+        dom.generateBtn.addEventListener('click', () => document.getElementById('code-output').scrollIntoView());
+        dom.copyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = document.getElementById(btn.dataset.target);
+                navigator.clipboard.writeText(target.value).then(() => {
+                    const originalHTML = btn.innerHTML;
+                    btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Copiado!`;
+                    lucide.createIcons();
+                    setTimeout(() => { btn.innerHTML = originalHTML; lucide.createIcons(); }, 2000);
+                });
+            });
+        });
+
+        // Eventos para pestañas de código
+        dom.tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                dom.tabBtns.forEach(b => b.classList.remove('active', 'bg-blue-600', 'text-white'));
+                btn.classList.add('active', 'bg-blue-600', 'text-white');
+                dom.tabContents.forEach(c => c.classList.add('hidden'));
+                document.getElementById(`${btn.dataset.tab}-content`).classList.remove('hidden');
+            });
+        });
+
+        // --- NUEVOS LISTENERS PARA GEMINI ---
+        dom.suggestContentBtn.addEventListener('click', async () => {
+            const apiKey = dom.geminiApiKey.value;
+            const topic = dom.websiteTopic.value;
+            if (!apiKey || !topic) {
+                alert("Por favor, introduce tu clave de API y el tema de la web.");
+                return;
+            }
+            
+            dom.suggestContentBtn.disabled = true;
+            dom.suggestContentBtn.innerHTML = `<i data-lucide="loader-circle" class="animate-spin w-4 h-4"></i> Generando...`;
+            lucide.createIcons();
+
+            try {
+                // Generar prompts
+                const navPrompt = `Genera una lista de 4 a 5 enlaces de navegación típicos para un sitio web sobre "${topic}". Responde solo con el formato "Texto,url" en cada línea. Por ejemplo:\nMenú,#\nEventos,#`;
+                const footerLinksPrompt = `Genera 2 columnas de enlaces para el pie de página de un sitio web sobre "${topic}". Responde solo con el formato "TITULO:Enlace 1,url1;Enlace 2,url2" en cada línea.`;
+                const copyrightPrompt = `Genera un texto de copyright para un sitio web llamado "${config.logoText}" sobre "${topic}" para el año actual. Responde solo con el texto del copyright.`;
+
+                // Llamadas a la API en paralelo
+                const [navResponse, footerLinksResponse, copyrightResponse] = await Promise.all([
+                    callGeminiAPI(navPrompt, apiKey),
+                    callGeminiAPI(footerLinksPrompt, apiKey),
+                    callGeminiAPI(copyrightPrompt, apiKey)
+                ]);
+
+                // Actualizar config y UI
+                if (navResponse) config.navLinks = navResponse.trim();
+                if (footerLinksResponse) config.footerLinks = footerLinksResponse.trim();
+                if (copyrightResponse) config.footerText = copyrightResponse.trim();
+                
+                updateUIFromConfig();
+                render();
+
+            } finally {
+                dom.suggestContentBtn.disabled = false;
+                dom.suggestContentBtn.innerHTML = `<i data-lucide="wand-2" class="w-4 h-4"></i> Sugerir Contenido`;
+                lucide.createIcons();
+            }
+        });
+        
+        dom.suggestPaletteBtn.addEventListener('click', async () => {
+            const apiKey = dom.geminiApiKey.value;
+            const style = dom.websiteStyle.value;
+            if (!apiKey || !style) {
+                alert("Por favor, introduce tu clave de API y describe un estilo.");
+                return;
+            }
+
+            dom.suggestPaletteBtn.disabled = true;
+            dom.suggestPaletteBtn.innerHTML = `<i data-lucide="loader-circle" class="animate-spin w-4 h-4"></i> Creando...`;
+            lucide.createIcons();
+            
+            try {
+                const prompt = `Crea una paleta de colores para un sitio web con un estilo "${style}". Necesito un color primario, un color de fondo para el encabezado, un color de texto y un color de fondo para el pie de página. Responde solo con un JSON válido con las claves "primary", "headerBg", "text" y "footerBg".`;
+                const response = await callGeminiAPI(prompt, apiKey, true);
+
+                if(response) {
+                    const colors = JSON.parse(response);
+                    config.colors.primary = colors.primary;
+                    config.colors.headerBg = colors.headerBg;
+                    config.colors.text = colors.text;
+                    config.colors.footerBg = colors.footerBg;
+
+                    updateUIFromConfig();
+                    render();
+                }
+            } catch (e) {
+                console.error("Error al parsear la paleta de colores:", e);
+                alert("La IA devolvió un formato de color inesperado. Inténtalo de nuevo.");
+            }
+            finally {
+                dom.suggestPaletteBtn.disabled = false;
+                dom.suggestPaletteBtn.innerHTML = `<i data-lucide="palette" class="w-4 h-4"></i> Sugerir Paleta de Colores`;
+                lucide.createIcons();
+            }
+        });
+    }
+
+    // --- INICIALIZACIÓN ---
+    updateUIFromConfig();
+    toggleLogoControls();
+    toggleFooterControls();
+    attachListeners();
+    render();
+});
+// ===================================================================================
+// FIN: CÓDIGO DEL GENERADOR
+// ===================================================================================
+</script>
+</body>
+</html>
+
