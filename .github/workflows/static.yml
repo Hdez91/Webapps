@@ -1,11 +1,23 @@
 run-name: Generador.html # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Deploy to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["main"]
+    branches: 
+    - main
+    - release/*
 
+on:
+  pull_request:
+    branches:
+    - main
+    
+on:
+  schedule:
+  - cron: "0 2 * * 1-5"
+  
+  on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
